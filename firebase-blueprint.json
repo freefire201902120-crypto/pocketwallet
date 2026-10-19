@@ -1,0 +1,205 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Payment transactions processed through bKash or Nagad gateways",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique transaction record identifier" },
+        "paymentID": { "type": "string", "description": "Gateway payment reference ID" },
+        "trxID": { "type": "string", "description": "Bank/MFS network transaction reference ID" },
+        "refundTrxID": { "type": "string", "description": "Refund reference ID if refunded" },
+        "walletType": { "type": "string", "enum": ["bkash", "nagad"], "description": "Mobile financial service wallet used" },
+        "amount": { "type": "number", "description": "Transaction amount in BDT" },
+        "refundAmount": { "type": "number", "description": "Refunded amount in BDT" },
+        "currency": { "type": "string", "description": "Currency code e.g. BDT" },
+        "merchantInvoiceNumber": { "type": "string", "description": "Merchant invoice or order reference" },
+        "customerMsisdn": { "type": "string", "description": "Customer mobile phone number" },
+        "customerName": { "type": "string", "description": "Customer name" },
+        "status": {
+          "type": "string",
+          "enum": ["Initiated", "Pending", "Completed", "Refunded", "Partially_Refunded", "Failed", "Cancelled"],
+          "description": "Lifecycle state of the payment"
+        },
+        "createdAt": { "type": "string", "description": "ISO timestamp when initiated" },
+        "completedAt": { "type": "string", "description": "ISO timestamp when completed" },
+        "note": { "type": "string", "description": "Optional notes or item descriptions" },
+        "fee": { "type": "number", "description": "MFS processing fee deducted in BDT" },
+        "netAmount": { "type": "number", "description": "Settled net amount in BDT" }
+      },
+      "required": ["id", "paymentID", "walletType", "amount", "currency", "merchantInvoiceNumber", "customerMsisdn", "status", "createdAt"]
+    },
+    "AppUser": {
+      "title": "AppUser",
+      "description": "Registered merchant or customer user profile in PocketWallet",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique user identifier" },
+        "name": { "type": "string", "description": "Full name in English" },
+        "nameBn": { "type": "string", "description": "Full name in Bengali" },
+        "email": { "type": "string", "description": "Email address" },
+        "phone": { "type": "string", "description": "Mobile phone number" },
+        "role": { "type": "string", "enum": ["super_admin", "admin", "merchant", "viewer"], "description": "Assigned access control role" },
+        "status": { "type": "string", "enum": ["active", "suspended"], "description": "Current account status" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of account creation" },
+        "balance": { "type": "number", "description": "Wallet balance in BDT" },
+        "businessName": { "type": "string", "description": "Business or trade organization name" },
+        "totalTransactions": { "type": "number", "description": "Total completed transaction count" },
+        "lastActive": { "type": "string", "description": "ISO timestamp of last activity" }
+      },
+      "required": ["id", "name", "email", "phone", "role", "status", "createdAt", "balance"]
+    },
+    "AdminAccount": {
+      "title": "AdminAccount",
+      "description": "Administrator account credentials and role metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Admin identifier" },
+        "name": { "type": "string", "description": "Admin full name" },
+        "email": { "type": "string", "description": "Admin email address" },
+        "phone": { "type": "string", "description": "Admin contact phone" },
+        "role": { "type": "string", "enum": ["super_admin", "admin", "merchant", "viewer"], "description": "Admin privilege level" },
+        "passwordHash": { "type": "string", "description": "SHA-256 password hash" },
+        "salt": { "type": "string", "description": "Cryptographic salt" },
+        "createdAt": { "type": "string", "description": "Account creation timestamp" },
+        "lastLogin": { "type": "string", "description": "Last successful login timestamp" }
+      },
+      "required": ["id", "name", "email", "role", "passwordHash", "salt", "createdAt"]
+    },
+    "StoreProduct": {
+      "title": "StoreProduct",
+      "description": "Storefront product inventory item available for purchase",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique product SKU / ID" },
+        "name": { "type": "string", "description": "Product title in English" },
+        "nameBn": { "type": "string", "description": "Product title in Bengali" },
+        "price": { "type": "number", "description": "Product price in BDT" },
+        "image": { "type": "string", "description": "Image URL or asset identifier" },
+        "category": { "type": "string", "description": "Category in English" },
+        "categoryBn": { "type": "string", "description": "Category in Bengali" },
+        "stock": { "type": "number", "description": "Current stock count" },
+        "badge": { "type": "string", "description": "Product promotional tag" }
+      },
+      "required": ["id", "name", "nameBn", "price", "image", "category", "categoryBn", "stock"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Digital invoice generated for merchant customers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique invoice identifier" },
+        "invoiceNumber": { "type": "string", "description": "Human-readable invoice code" },
+        "customerName": { "type": "string", "description": "Billed customer name" },
+        "customerPhone": { "type": "string", "description": "Billed customer phone number" },
+        "customerEmail": { "type": "string", "description": "Optional customer email" },
+        "totalAmount": { "type": "number", "description": "Grand total in BDT" },
+        "status": { "type": "string", "enum": ["Unpaid", "Paid"], "description": "Invoice payment state" },
+        "createdAt": { "type": "string", "description": "Issue timestamp" },
+        "dueDate": { "type": "string", "description": "Due date timestamp" },
+        "paymentId": { "type": "string", "description": "Linked payment ID if paid" },
+        "trxId": { "type": "string", "description": "Linked MFS transaction ID if paid" },
+        "walletUsed": { "type": "string", "description": "bKash or Nagad" }
+      },
+      "required": ["id", "invoiceNumber", "customerName", "customerPhone", "totalAmount", "status", "createdAt", "dueDate"]
+    },
+    "AuditLogEntry": {
+      "title": "AuditLogEntry",
+      "description": "Immutable administrative audit trail record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique log entry ID" },
+        "timestamp": { "type": "string", "description": "ISO timestamp of event" },
+        "actor": { "type": "string", "description": "Admin or system entity performing the action" },
+        "action": { "type": "string", "description": "Action performed" },
+        "category": {
+          "type": "string",
+          "enum": ["USER", "ROLE", "SECURITY", "GATEWAY", "REFUND", "SYSTEM", "TRANSACTION"],
+          "description": "Audit classification category"
+        },
+        "target": { "type": "string", "description": "Target entity or resource ID" },
+        "details": { "type": "string", "description": "Human readable event detail" }
+      },
+      "required": ["id", "timestamp", "actor", "action", "category", "target", "details"]
+    },
+    "RoleDefinition": {
+      "title": "RoleDefinition",
+      "description": "Role-based access control definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "enum": ["super_admin", "admin", "merchant", "viewer"], "description": "Role unique key" },
+        "title": { "type": "string", "description": "Role title in English" },
+        "titleBn": { "type": "string", "description": "Role title in Bengali" },
+        "description": { "type": "string", "description": "Role description in English" },
+        "descriptionBn": { "type": "string", "description": "Role description in Bengali" },
+        "badgeColor": { "type": "string", "description": "Hex or Tailwind badge color styling" }
+      },
+      "required": ["id", "title", "titleBn", "description", "descriptionBn", "badgeColor"]
+    },
+    "WebhookEvent": {
+      "title": "WebhookEvent",
+      "description": "MFS IPN webhook notification event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Webhook event ID" },
+        "event": { "type": "string", "description": "Webhook event type" },
+        "walletType": { "type": "string", "enum": ["bkash", "nagad"], "description": "Target wallet gateway" },
+        "paymentID": { "type": "string", "description": "Associated payment ID" },
+        "trxID": { "type": "string", "description": "Associated transaction ID" },
+        "amount": { "type": "number", "description": "Payment amount" },
+        "timestamp": { "type": "string", "description": "Timestamp of dispatch" },
+        "statusCode": { "type": "number", "description": "HTTP status code response" },
+        "delivered": { "type": "boolean", "description": "Whether successfully delivered" }
+      },
+      "required": ["id", "event", "walletType", "paymentID", "amount", "timestamp", "statusCode", "delivered"]
+    },
+    "GatewaySettings": {
+      "title": "GatewaySettings",
+      "description": "Gateway credentials and global application configuration",
+      "type": "object",
+      "properties": {
+        "env": { "type": "string", "enum": ["sandbox", "live"], "description": "Active environment" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["env"]
+    }
+  },
+  "firestore": {
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Live payment transactions from bKash and Nagad"
+    },
+    "/users/{userId}": {
+      "schema": "AppUser",
+      "description": "User accounts and merchant profiles"
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminAccount",
+      "description": "Administrator accounts and credentials"
+    },
+    "/products/{productId}": {
+      "schema": "StoreProduct",
+      "description": "Storefront product inventory"
+    },
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Merchant digital invoices"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLogEntry",
+      "description": "Administrative audit trail logs"
+    },
+    "/roles/{roleId}": {
+      "schema": "RoleDefinition",
+      "description": "Role-based access control roles and permissions"
+    },
+    "/webhooks/{webhookId}": {
+      "schema": "WebhookEvent",
+      "description": "Gateway webhook and IPN event logs"
+    },
+    "/settings/{settingId}": {
+      "schema": "GatewaySettings",
+      "description": "Global gateway configurations and environment settings"
+    }
+  }
+}

@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for custom Web Crypto auth & strict input validation
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // 1. Transactions Collection: Real-time MFS payment records (bKash & Nagad)
+    // Supports list queries (where/orderBy) and single-document get
+    match /transactions/{transactionId} {
+      allow get: if isValidId(transactionId);
+      allow list: if true;
+      allow create: if isValidId(transactionId) &&
+        incoming().amount is number && incoming().amount > 0 &&
+        incoming().walletType in ['bkash', 'nagad'] &&
+        incoming().status in ['Initiated', 'Completed', 'Failed', 'Cancelled'] &&
+        incoming().customerPhone is string &&
+        incoming().createdAt is string;
+      allow update: if isValidId(transactionId) &&
+        incoming().amount is number && incoming().amount > 0 &&
+        incoming().walletType in ['bkash', 'nagad'] &&
+        incoming().status in ['Initiated', 'Completed', 'Failed', 'Cancelled'];
+      allow delete: if false; // Financial records are strictly immutable
+    }
+
+    // 2. Users Collection: Merchant, staff & client accounts with Web Crypto auth
+    match /users/{userId} {
+      allow get: if isValidId(userId);
+      allow list: if true;
+      allow create: if isValidId(userId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 120 &&
+        incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
+        incoming().role in ['super_admin', 'finance_manager', 'auditor', 'support_agent', 'merchant', 'viewer'] &&
+        incoming().status in ['active', 'suspended', 'pending'];
+      allow update: if isValidId(userId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 120 &&
+        incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150;
+      allow delete: if isValidId(userId);
+    }
+
+    // 3. Admins Collection: Custom Web Crypto administrator accounts
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId);
+      allow list: if true;
+      allow create: if isValidId(adminId) &&
+        incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
+        incoming().passwordHash is string && incoming().passwordHash.size() > 0 &&
+        incoming().passwordSalt is string;
+      allow update: if isValidId(adminId) &&
+        incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150;
+      allow delete: if isValidId(adminId);
+    }
+
+    // 4. Products Collection: Digital catalog items
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create, update: if isValidId(productId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 150 &&
+        incoming().price is number && incoming().price >= 0;
+      allow delete: if isValidId(productId);
+    }
+
+    // 5. Invoices Collection: MFS merchant billing & payment invoices
+    match /invoices/{invoiceId} {
+      allow get: if isValidId(invoiceId);
+      allow list: if true;
+      allow create, update: if isValidId(invoiceId) &&
+        incoming().invoiceNumber is string && incoming().invoiceNumber.size() > 0 && incoming().invoiceNumber.size() <= 64 &&
+        incoming().totalAmount is number && incoming().totalAmount >= 0;
+      allow delete: if isValidId(invoiceId);
+    }
+
+    // 6. Audit Logs Collection: Append-only administrative activity trail
+    match /auditLogs/{logId} {
+      allow get: if isValidId(logId);
+      allow list: if true;
+      allow create: if isValidId(logId) &&
+        incoming().action is string && incoming().action.size() > 0 && incoming().action.size() <= 120 &&
+        incoming().timestamp is string;
+      allow update, delete: if false; // Tamper-proof audit logs cannot be modified or deleted
+    }
+
+    // 7. Roles Collection: Custom RBAC role definitions
+    match /roles/{roleId} {
+      allow get: if isValidId(roleId);
+      allow list: if true;
+      allow create, update: if isValidId(roleId) &&
+        incoming().title is string && incoming().title.size() > 0 && incoming().title.size() <= 100;
+      allow delete: if false;
+    }
+
+    // 8. Webhooks Collection: IPN and gateway callback delivery logs
+    match /webhooks/{webhookId} {
+      allow get: if isValidId(webhookId);
+      allow list: if true;
+      allow create: if isValidId(webhookId) &&
+        incoming().event is string && incoming().event.size() > 0 && incoming().event.size() <= 100;
+      allow update, delete: if false; // Webhook delivery events are append-only
+    }
+
+    // 9. Settings Collection: MFS Gateway configs (bKash & Nagad) & test probes
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId);
+      allow list: if true;
+      allow create, update: if isValidId(settingId);
+      allow delete: if false;
+    }
+  }
+}

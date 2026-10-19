@@ -1,0 +1,21 @@
+{
+  "short_name": "PocketWallet",
+  "name": "PocketWallet - Unified MFS Gateway",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B0F17",
+  "theme_color": "#E2136E",
+  "display": "standalone",
+  "orientation": "portrait"
+}

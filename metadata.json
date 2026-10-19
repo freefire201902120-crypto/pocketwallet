@@ -1,0 +1,6 @@
+{
+  "name": "PocketWallet - Unified MFS Payment Gateway Studio",
+  "description": "Unified bKash and Nagad mobile payment gateway suite, checkout emulator, API sandbox, and merchant transactions dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
